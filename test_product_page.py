@@ -1,9 +1,12 @@
-import pytest
 import sys
 import os
 sys.path.append(os.path.abspath(os.path.dirname(__file__)))
+import pytest
+import time
 from pages.product_page import ProductPage
+from pages.login_page import LoginPage
 from pages.locators import ProductPageLocators
+from pages.locators import BasePageLocators
 from pages.basket_page import BasketPage
 
 '''
@@ -36,6 +39,58 @@ def test_guest_can_add_product_to_basket(browser, link):
 '''
 link = "http://selenium1py.pythonanywhere.com/catalogue/coders-at-work_207/"
 
+
+@pytest.mark.login
+class TestLoginFromProductPage():
+    @pytest.fixture(scope="function", autouse=True)
+    def setup(self):
+        self.product = ProductFactory(title = "Best book created by robot")
+        self.link = self.product.link
+        yield
+        self.product.delete()
+
+    def test_guest_can_go_to_login_page_from_product_page(self, browser):
+        link = "http://selenium1py.pythonanywhere.com/en-gb/catalogue/the-city-and-the-stars_95/"
+        page = ProductPage(browser, self.link)
+        page.open()
+        page.go_to_login_page()
+
+    def test_guest_should_see_login_link_on_product_page(self, browser):
+        link = "http://selenium1py.pythonanywhere.com/en-gb/catalogue/the-city-and-the-stars_95/"
+        page = ProductPage(browser, self.link)
+        page.open()
+        page.should_be_login_link()
+
+
+class TestUserAddToBasketFromProductPage:
+
+    @pytest.fixture(scope="function", autouse=True)
+    def setup(self, browser):
+        login_link = "http://selenium1py.pythonanywhere.com/en-gb/accounts/login/"
+        page = LoginPage(browser, login_link)
+        page.open()
+        email = str(time.time()) + "@fakemail.org"
+        password = "TestPassword123!"
+        page.register_new_user(email, password)
+        page.should_be_authorized_user()
+
+    def test_user_cant_see_success_message(self, browser):
+        link = "http://selenium1py.pythonanywhere.com/catalogue/the-shellcoders-handbook_209/"
+        page = ProductPage(browser, link)
+        page.open()
+        page.should_not_be_success_message()
+
+    def test_user_can_add_product_to_basket(self, browser):
+        link = "http://selenium1py.pythonanywhere.com/catalogue/the-shellcoders-handbook_209/"
+        page = ProductPage(browser, link)
+        page.open()
+        page.add_product_to_basket()
+        page.should_be_add_to_basket_message()
+        product_price = page.browser.find_element(*ProductPageLocators.PRODUCT_PRICE).text
+        page.should_be_correct_price_in_message(product_price)
+
+
+
 @pytest.mark.xfail(reason="Success message appears after adding product to basket")
 def test_guest_cant_see_success_message_after_adding_product_to_basket(browser):
     page = ProductPage(browser, link)
@@ -58,17 +113,6 @@ def test_message_disappeared_after_adding_product_to_basket(browser):
     assert page.is_disappeared(*ProductPageLocators.SUCCESS_MESSAGE_PRODUCT), \
         "Success message did not disappear as expected"
 
-def test_guest_should_see_login_link_on_product_page(browser):
-    link = "http://selenium1py.pythonanywhere.com/en-gb/catalogue/the-city-and-the-stars_95/"
-    page = ProductPage(browser, link)
-    page.open()
-    page.should_be_login_link()
-
-def test_guest_can_go_to_login_page_from_product_page(browser):
-    link = "http://selenium1py.pythonanywhere.com/en-gb/catalogue/the-city-and-the-stars_95/"
-    page = ProductPage(browser, link)
-    page.open()
-    page.go_to_login_page()
 
 def test_guest_cant_see_product_in_basket_opened_from_product_page(browser):
     link = "http://selenium1py.pythonanywhere.com/catalogue/the-city-and-the-stars_95/"

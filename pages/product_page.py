@@ -10,6 +10,9 @@ class ProductPage(BasePage):
         basket_button = self.browser.find_element(*ProductPageLocators.ADD_TO_BASKET_BUTTON)
         basket_button.click()
 
+    def should_be_add_to_basket_message(self):
+        assert self.is_element_present(*ProductPageLocators.SUCCESS_MESSAGE), "Success message is not presented"
+
     def get_product_name(self):
         return self.browser.find_element(*ProductPageLocators.PRODUCT_NAME).text
 
