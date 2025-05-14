@@ -24,7 +24,11 @@ from pages.basket_page import BasketPage
     "http://selenium1py.pythonanywhere.com/catalogue/coders-at-work_207/?promo=offer8",
     "http://selenium1py.pythonanywhere.com/catalogue/coders-at-work_207/?promo=offer9"
 ])
+'''
 
+link = "http://selenium1py.pythonanywhere.com/catalogue/coders-at-work_207/"
+
+@pytest.mark.need_review
 def test_guest_can_add_product_to_basket(browser, link):
     page = ProductPage(browser, link)
     page.open()
@@ -36,8 +40,6 @@ def test_guest_can_add_product_to_basket(browser, link):
 
     page.should_be_correct_product_in_message(name)
     page.should_be_correct_price_in_message(price)
-'''
-link = "http://selenium1py.pythonanywhere.com/catalogue/coders-at-work_207/"
 
 
 @pytest.mark.login
@@ -49,6 +51,7 @@ class TestLoginFromProductPage():
         yield
         self.product.delete()
 
+    @pytest.mark.need_review
     def test_guest_can_go_to_login_page_from_product_page(self, browser):
         link = "http://selenium1py.pythonanywhere.com/en-gb/catalogue/the-city-and-the-stars_95/"
         page = ProductPage(browser, self.link)
@@ -80,6 +83,7 @@ class TestUserAddToBasketFromProductPage:
         page.open()
         page.should_not_be_success_message()
 
+    @pytest.mark.need_review
     def test_user_can_add_product_to_basket(self, browser):
         link = "http://selenium1py.pythonanywhere.com/catalogue/the-shellcoders-handbook_209/"
         page = ProductPage(browser, link)
@@ -113,7 +117,7 @@ def test_message_disappeared_after_adding_product_to_basket(browser):
     assert page.is_disappeared(*ProductPageLocators.SUCCESS_MESSAGE_PRODUCT), \
         "Success message did not disappear as expected"
 
-
+@pytest.mark.need_review
 def test_guest_cant_see_product_in_basket_opened_from_product_page(browser):
     link = "http://selenium1py.pythonanywhere.com/catalogue/the-city-and-the-stars_95/"
     page = ProductPage(browser, link)
